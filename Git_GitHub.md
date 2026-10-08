@@ -16,6 +16,12 @@
    - [Fast-forward](#33-fast-forward)
    - [3-way merge](#34-3-way-merge)
    - [Merge conflict](#35-merge-conflict)
+4. [GitHub 실습](#4-github-실습)
+   - [원격 저장소 만들고 연결 및 Push 하기](#41-원격-저장소-만들고-연결-및-push-하기)
+   - [기본 브랜치를 main으로 설정하는 법](#42-기본-브랜치를-main으로-설정하는-법)
+   - [README 만들고 로컬에 반영하기](#43-readme-만들고-로컬에-반영하기)
+   - [Issue 생성 및 처리](#44-issue-생성-및-처리)
+   - [다른 레포지토리 가져오기 (Clone)](#45-다른-레포지토리-가져오기-clone)
 
 ---
 
@@ -387,6 +393,152 @@ git log --oneline --graph                 # 결과 확인
 ```
 
 > 병합을 그만두고 충돌 전 상태로 돌아가려면 `git merge --abort`를 실행한다.
+
+---
+
+## 4. GitHub 실습
+
+### 4.1 원격 저장소 만들고 연결 및 Push 하기
+
+**원격 저장소에 올리는 이유**
+
+- 코드와 Git 사용 내역(커밋 이력)을 공유할 수 있다.
+- 오픈 소스 개발에 참여하거나 내 프로젝트를 공개할 수 있다.
+- 내 컴퓨터가 고장 나도 코드가 남아 있다. (백업)
+
+**순서**
+
+1. GitHub에서 레포지토리를 생성한다.
+   - 오른쪽 위 `+` > `New repository` 클릭
+   - Repository name 입력, Public / Private 선택 후 `Create repository` 클릭
+   - 로컬에 이미 커밋이 있다면 README, .gitignore는 추가하지 않고 빈 저장소로 만든다. (추가하면 첫 push가 거절된다.)
+2. `Quick setup` 에 표시된 주소를 복사한다. (`https://github.com/계정/저장소.git`)
+3. 터미널에서 연결하고 push 한다.
+
+```bash
+git switch main                                # main 브랜치로 이동
+git remote add origin 복사한_Quick_setup_주소   # 원격 저장소 연결
+git remote -v                                  # 연결 확인
+git push origin main                           # 로컬 커밋 업로드
+```
+
+`git remote -v` 를 실행하면 주소가 두 줄 나온다.
+
+| 구분 | 방향 | 의미 |
+| --- | --- | --- |
+| `fetch` | 원격 저장소 → 내 컴퓨터 | Download |
+| `push` | 내 컴퓨터 → 원격 저장소 | Upload |
+
+4. GitHub에 가서 업로드한 내용을 확인한다.
+
+> - 처음 올릴 때 `git push -u origin main` 으로 실행하면 이후에는 `git push` 만 입력해도 된다.
+> - GitHub에서 저장소 이름을 바꿨다면 `git remote set-url origin 새_주소` 로 로컬에 저장된 주소를 수정한다.
+
+### 4.2 기본 브랜치를 main으로 설정하는 법
+
+Git을 설치한 환경에 따라 기본 브랜치가 `master` 로 만들어질 수 있다. GitHub의 기본 브랜치는 `main` 이므로 이름을 맞춰 준다.
+
+```bash
+git branch -m master main                    # 현재 저장소의 master 브랜치 이름을 main으로 변경
+git config --global init.defaultBranch main  # 앞으로 git init 할 때 기본 브랜치를 main으로 생성
+```
+
+### 4.3 README 만들고 로컬에 반영하기
+
+`README.md` 는 저장소 첫 화면에 표시되는 소개 문서이다. 파일이 없는 경우 GitHub에서 바로 만들 수 있다.
+
+1. 저장소 화면에서 `Add a README` 클릭
+2. 내용 작성 (마크다운 형식) → `Commit changes` 클릭
+3. 로컬 저장소에 반영
+
+```bash
+git pull origin main    # 로컬에 새 커밋이 없으면 Fast-forward 로 반영된다
+```
+
+4. 로컬에서 README 반영 내용 확인
+
+> GitHub 웹에서 파일을 수정하면 GitHub에만 새 커밋이 생긴다. 로컬에서 다음 작업을 하기 전에 `git pull` 부터 한다. 건너뛰고 push 하면 거절(`rejected`)된다.
+
+### 4.4 Issue 생성 및 처리
+
+Issue는 할 일, 버그 리포트, 기능 요청 등을 관리하는 기능이다. Issue → 브랜치 → Pull Request → 코드 리뷰 → Merge 순서로 작업한다.
+
+**1) Issue 생성**
+
+- `Issues` 탭 > `New issue` 클릭
+- 예) "README 내용 보완" 이슈 생성 → `#1` 번호가 부여된다.
+- 담당자(Assignees), 라벨(Labels) 등을 지정한다.
+
+**2) 브랜치에서 작업 후 push**
+
+VS Code에서 내용을 수정한 뒤 터미널에서 add → commit → push 한다.
+
+```bash
+git switch -c docs              # 브랜치 생성 + 만든 브랜치로 바로 이동
+git add README.md
+git commit -m "README Update"
+git push origin docs
+```
+
+이 시점에는 변경 내용이 `docs` 브랜치에만 있고 `main` 에는 아직 반영되지 않았다.
+
+**3) Pull Request 생성**
+
+- `Code` 탭(main)에 나타난 `Compare & pull request` 버튼 클릭
+- `Open a pull request` 화면에서 제목과 설명을 작성한다. (base: `main` ← compare: `docs`)
+- 설명에 `fix: #1` 을 적으면 PR이 병합될 때 #1 이슈가 자동으로 종료된다. (`close`, `fix`, `resolve` 계열 키워드 + 이슈 번호)
+- `Create pull request` 클릭
+
+**4) 코드 리뷰**
+
+- `Files changed` 탭에서 변경 내용을 확인한다.
+- 코드 줄에 코멘트를 남긴다.
+- `Review changes` > `Submit review` 클릭 (리뷰 완료)
+
+**5) Merge**
+
+- `Merge pull request` > `Confirm merge` 클릭 → `docs` 의 내용이 `main` 에 병합된다.
+- #1 이슈가 종료(Closed)되었는지 확인한다.
+
+**6) 로컬 main 동기화**
+
+```bash
+git switch main
+git pull origin main
+```
+
+> 병합이 끝난 브랜치는 `git branch -d docs` 로 삭제한다.
+
+### 4.5 다른 레포지토리 가져오기 (Clone)
+
+`git clone` 은 원격 저장소를 커밋 이력까지 그대로 내 컴퓨터로 복사한다.
+
+1. 내려받을 폴더를 만들고 이동한다.
+
+```bash
+mkdir clone
+cd clone
+```
+
+2. 내려받을 레포지토리 페이지에서 주소를 복사한다.
+   - 초록색 `<> Code` 버튼 클릭 > `HTTPS` 탭의 주소 복사
+3. 복사한 주소로 clone 한다.
+
+```bash
+git clone https://github.com/fastapi/fastapi.git
+```
+
+4. 내려받은 내용을 확인한다.
+
+```bash
+ls                      # 저장소 이름과 같은 fastapi 폴더가 생긴다
+cd fastapi
+git log --oneline -5    # 커밋 이력까지 함께 받아졌는지 확인
+git remote -v           # origin 이 자동으로 연결되어 있다
+```
+
+- 원격 저장소가 `origin` 으로 자동 연결되므로 `git init`, `git remote add` 를 할 필요가 없다.
+- 기존 Git 저장소 폴더 안에서 clone 하면 저장소가 중첩되므로 별도 폴더에서 실행한다.
 
 ---
 
